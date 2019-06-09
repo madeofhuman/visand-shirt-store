@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 import Image from '../../atoms/Image/Image';
+import Text from '../../atoms/Text/Text';
 import SubHeader from '../../atoms/SubHeader/SubHeader';
 import Price from '../../atoms/Price/Price';
 import ItemAttributes from '../../molecules/ItemAttributes/ItemAttributes';
@@ -19,6 +20,12 @@ import toastr from '../../../helpers/toastr';
 const Wrapper = styled.div`
   width: 70%;
   margin: 3em auto;
+
+  .price-with-discount,
+  .price-with-discount p {
+    color: grey;
+    line-height: 1.6;
+  }
 `;
 
 Wrapper.Gallery = styled.section`
@@ -133,9 +140,10 @@ class Product extends Component {
 
   render() {
     const { product: {
-      productId, name, price, image, image2, attributes,
+      productId, name, price, discountedPrice, image, image2, attributes, description,
     } } = this.props;
     const { quantity, src, selectedAttributes } = this.state;
+    const isDiscounted = Number.parseFloat(discountedPrice) > 0;
     return (
       <Wrapper>
         {
@@ -161,7 +169,19 @@ class Product extends Component {
                 </Wrapper.Gallery>
                 <Wrapper.Section>
                   <SubHeader>{name}</SubHeader>
-                  <Price>{price}</Price>
+                  {isDiscounted ? (
+                    <Flex>
+                      <Price size="large" className="discounted-price">
+                        {discountedPrice}
+                      </Price>
+                      <s className="price-with-discount">
+                        <Price className="price-with-discount">{price}</Price>
+                      </s>
+                    </Flex>
+                  ) : (
+                    <Price size="large">{price}</Price>
+                  )}
+                  <Text>{description}</Text>
                   <ItemAttributes
                     attributes={attributes}
                     handleAttributeChange={this.handleAttributeChange}
