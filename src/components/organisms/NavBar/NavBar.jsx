@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 
+import { addItemToCart, removeItemFromCart } from '../../../actions/cart';
+
 import SubHeader from '../../atoms/SubHeader/SubHeader';
 import NavLink from '../../molecules/NavLink/NavLink';
 import Title from '../../atoms/Title/Title';
@@ -98,6 +100,28 @@ export class NavBar extends Component {
     }
   }
 
+  handleAddToCart = async (productId) => {
+    try {
+      const { addItemToCart } = this.props;
+      await addItemToCart({ productId });
+      toastr.success('Successfully added item to cart');
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  handleRemoveFromCart = async (itemId, quantity) => {
+    try {
+      const { removeItemFromCart } = this.props;
+      if (quantity > 1) {
+        await removeItemFromCart({ itemId });
+        toastr.success('Successfully removed one item from cart');
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   render() {
     const { items, profile: { name } } = this.props;
     const { search, displayCart } = this.state;
@@ -141,6 +165,8 @@ export class NavBar extends Component {
           items={items}
           displayCart={displayCart}
           handleCartToggle={this.handleCartToggle}
+          handleAddToCart={this.handleAddToCart}
+          handleRemoveFromCart={this.handleRemoveFromCart}
         />
       </Wrapper>
     );
@@ -155,6 +181,8 @@ export const mapStateToProps = state => ({
 export const mapDispatchToProps = dispatch => ({
   getCatalog: search => dispatch(getCatalog(search)),
   getCartDetails: () => dispatch(getCartDetails()),
+  addItemToCart: productId => dispatch(addItemToCart(productId)),
+  removeItemFromCart: itemId => dispatch(removeItemFromCart(itemId)),
   logoutUser: () => dispatch(logoutUser()),
 });
 

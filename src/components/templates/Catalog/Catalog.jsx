@@ -115,7 +115,7 @@ export const mapStateToProps = state => {
   const products =  state.catalog.paginatedProducts.length
     ? state.catalog.paginatedProducts
     : state.catalog.filteredProducts;
-    
+
   return {
     departments: state.catalog.departments,
     categories: state.catalog.categories,
