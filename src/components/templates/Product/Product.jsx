@@ -3,14 +3,19 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
+import { getCatalog } from '../../../actions/catalog';
+
 import Image from '../../atoms/Image/Image';
 import Text from '../../atoms/Text/Text';
+import Divider from '../../atoms/Divider/Divider';
+import Title from '../../atoms/Title/Title';
 import SubHeader from '../../atoms/SubHeader/SubHeader';
 import Price from '../../atoms/Price/Price';
 import ItemAttributes from '../../molecules/ItemAttributes/ItemAttributes';
 import Quantity from '../../molecules/Quantity/Quantity';
 import Button, { ButtonType, ButtonSize } from '../../atoms/Button/Button';
 import Flex from '../../_layouts/Flex';
+import Item from '../../molecules/Item/Item';
 import { color } from '../../_settings/_variables';
 
 import { getProductDetails } from '../../../actions/catalog';
@@ -25,6 +30,11 @@ const Wrapper = styled.div`
   .price-with-discount p {
     color: grey;
     line-height: 1.6;
+  }
+
+  .vs-item {
+    width: 25%;
+    margin: auto;
   }
 `;
 
@@ -89,8 +99,9 @@ class Product extends Component {
 
   async componentDidMount() {
     try {
-      const { match: { params: { productId } }, getProductDetails } = this.props;
+      const { match: { params: { productId } }, getProductDetails, getCatalog } = this.props;
       await getProductDetails(productId);
+      await getCatalog();
     } catch (err) {
       console.log(err);
     }
@@ -139,9 +150,13 @@ class Product extends Component {
   });
 
   render() {
-    const { product: {
-      productId, name, price, discountedPrice, image, image2, attributes, description,
-    } } = this.props;
+    const {
+      product: {
+        productId, name, price, discountedPrice,
+        image, image2, attributes, description,
+      },
+      products,
+    } = this.props;
     const { quantity, src, selectedAttributes } = this.state;
     const isDiscounted = Number.parseFloat(discountedPrice) > 0;
     return (
@@ -204,6 +219,24 @@ class Product extends Component {
             )
             : ''
         }
+        <br /> <br />
+        <Title>Similar Items</Title>
+        <Divider />
+        <br /> <br />
+        <Flex justifyContent="space-between">
+          {
+            products.map((product, i) => {
+              if (i < 3) {
+                i++;
+                return (<Item
+                  handleAddItemToCart={this.handleAddToCart}
+                  key={product.productId}
+                  item={product}
+                />);
+              }
+            })
+          }
+        </Flex>
       </Wrapper>
     );
   }
@@ -211,11 +244,13 @@ class Product extends Component {
 
 export const mapStateToProps = state => ({
   product: state.catalog.product,
+  products: state.catalog.products,
 });
 
 export const mapDispatchToProps = dispatch => ({
   getProductDetails: productId => dispatch(getProductDetails(productId)),
   addItemToCart: item => dispatch(addItemToCart(item)),
+  getCatalog: () => dispatch(getCatalog()),
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Product);
